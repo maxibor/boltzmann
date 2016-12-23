@@ -2,13 +2,14 @@ import subprocess
 import numpy as np
 
 ###############################################################
-# Parsing du fichier de trajectoires pour les vitesses
+# Parsing du fichier de trajectoires pour les composantes des vitesses
 # de la forme
 # v[ 6950]={-5.55062e-01, -6.19157e-01,  5.54301e-01}
 # et ecriture dans le fichier speed.csv
 # sous la forme speed_x, speed_y, speed_z
 ###############################################################
-cmd = "gmx dump -f md_1BTA_100ns_dt2ns.trr"
+
+cmd = "gmx dump -f ./data/md_1BTA_100ns_dt2ns.trr"
 res = subprocess.check_output(cmd, shell = True)
 res = res.split("\n")
 
@@ -18,8 +19,6 @@ speed_z = []
 
 i = 0
 for line in res[2:] :
-    if i == 18699 :
-        break
     if "v" in line and len(line) > 20 :
         line = line.split("{")
         line = line[1].split(",")
@@ -30,7 +29,7 @@ for line in res[2:] :
         i += 1
 
 
-with open("speed.csv","w") as speed_file :
+with open("./data/speed.csv","w") as speed_file :
     speed_file.write("x,y,z\n")
     for xs,ys,zs in zip(speed_x,speed_y,speed_z) :
         speed_file.write(str(xs)+","+str(ys)+","+str(zs)+"\n")
@@ -41,7 +40,7 @@ with open("speed.csv","w") as speed_file :
 # avec une norme par ligne
 ###############################################################
 speed_vector = []
-with open("speed.csv","r") as speed :
+with open("./data/speed.csv","r") as speed :
     next(speed)
     for line in speed :
         line = line.rstrip()
@@ -52,7 +51,7 @@ with open("speed.csv","r") as speed :
         speed_vector.append(np.sqrt(x+y+z))
 
 
-with open("speed_vector.txt","w") as fileout:
+with open("./data/speed_vector.txt","w") as fileout:
     for elem in speed_vector :
         fileout.write(str(elem)+"\n")
 
@@ -68,7 +67,7 @@ with open("speed_vector.txt","w") as fileout:
 atom_mass = {"C" : 12, "N" : 14, "O" : 16, "H" : 1, "S" : 32}
 
 mass = []
-with open("md_start.pdb", "r") as pdb :
+with open("./data/md_start.pdb", "r") as pdb :
     for line in pdb :
         if "ATOM" in line[0:6] :
             line = line.split("\n")[0]
@@ -83,12 +82,12 @@ with open("md_start.pdb", "r") as pdb :
                         mass.append(atom_mass[key])
                         break
 
-with open("mass.txt", "w") as mf :
+with open("./data/mass.txt", "w") as mf :
     for elem in mass :
         mf.write(str(elem)+"\n")
 
 
-
+print "Parsing finished, R analysis starting, please wait..."
 ###############################################################
 # Lancement de l'analyse en R
 ###############################################################
